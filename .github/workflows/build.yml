@@ -103,7 +103,9 @@ jobs:
     - name: Tag name
       id: tag_name
       run: |
-        TAG_NAME="${{ needs.generate_changelog.outputs.version_number }}.${{ needs.generate_changelog.outputs.build_number }}-${{ github.event.inputs.environment }}"
+        TAG_NAME="${{ needs.generate_changelog.outputs.version_number }}.\
+        ${{ needs.generate_changelog.outputs.build_number }}-\
+        ${{ github.event.inputs.environment }}"
         echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
     - uses: ncipollo/release-action@v1
       with:
