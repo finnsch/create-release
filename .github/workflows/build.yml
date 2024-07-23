@@ -110,4 +110,4 @@ jobs:
         artifacts: world.txt
         body: "${{ needs.release_notes.outputs.release_notes }}"
         tag: "${{ steps.tag_name.outputs.tag_name }}"
-        prerelease: true
+        prerelease: ${{ github.event.inputs.environment != 'release' }}
