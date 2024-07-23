@@ -1,0 +1,113 @@
+name: Create build
+
+run-name: Deploy build by @${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        descriptions: 'Choose which environment to build'
+        options:
+          - dev
+          - stage
+          - release
+      release_name:
+        type: string
+        description: 'Release name (e.g. RC). It will be added to the release notes.'
+
+jobs:
+  generate_changelog:
+    name: Generate changelog
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version_number: ${{ steps.changelog.outputs.version_number }}
+      build_number: ${{ steps.changelog.outputs.build_number }}
+      changelog: ${{ steps.changelog.outputs.changelog }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Generate changelog
+      id: changelog
+      run: |
+        VERSION_NUMBER="1.0.0"
+        BUILD_NUMBER=$GITHUB_RUN_NUMBER
+        echo "version_number=$VERSION_NUMBER" >> $GITHUB_OUTPUT
+        echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+        delimiter="$(openssl rand -hex 8)"
+        {
+          echo "changelog<<${delimiter}"
+          echo "## ${VERSION_NUMBER} (${BUILD_NUMBER})"
+          # Escape double quotes
+          cat changelog.txt | sed 's/"/\\"/g'
+          echo
+          echo "${delimiter}"
+        } >> "$GITHUB_OUTPUT"
+
+  create_build:
+    name: Create build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [generate_changelog]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - run: echo hello > world.txt
+    - uses: actions/upload-artifact@v4
+      with:
+        name: my-build
+        path: world.txt
+
+  release_notes:
+    name: Generate release notes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [create_build, generate_changelog]
+    outputs:
+      release_notes: ${{ steps.release_notes.outputs.release_notes }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Create release notes
+      id: release_notes
+      shell: bash
+      run: |
+        RELEASE_NAME="${{ github.event.inputs.release_name }}"
+        ENVIRONMENT="${{ github.event.inputs.environment }}"
+        delimiter="$(openssl rand -hex 8)"
+        {
+          echo "release_notes<<${delimiter}"
+          [[ $RELEASE_NAME ]] && printf "$RELEASE_NAME\n\n";
+          echo "$ENVIRONMENT"
+          echo
+          echo "${{ needs.generate_changelog.outputs.changelog }}"
+          echo
+          echo "${delimiter}"
+        } >> "$GITHUB_OUTPUT"
+
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [create_build, generate_changelog, release_notes]
+    permissions:
+      contents: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Download build
+      uses: actions/download-artifact@v4
+      with:
+        name: my-build
+    - name: Tag name
+      id: tag_name
+      run: |
+        TAG_NAME="${{ needs.generate_changelog.outputs.version_number }}.${{ needs.generate_changelog.outputs.build_number }}-${{ github.event.inputs.environment }}"
+        echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: world.txt
+        body: "${{ needs.release_notes.outputs.release_notes }}"
+        tag: "${{ steps.tag_name.outputs.tag_name }}"
+        prerelease: true
