@@ -21,6 +21,8 @@ jobs:
       with:
         lfs: true
     - run: echo "hello simulator" > simulator.txt
+    - name: Use secret
+      run: echo ${{ secrets.TEST_SECRET }}
     - name: Upload archived simulator app
       uses: actions/upload-artifact@v4
       with:

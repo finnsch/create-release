@@ -123,10 +123,12 @@ jobs:
     uses: ./.github/workflows/simulator-build.yml
     with:
       environment: ${{ github.event.inputs.environment }}
+    secrets: inherit
 
   test_automation:
     name: Run tests
     needs: [simulator_build]
     uses: ./.github/workflows/test-automation.yml
+    secrets: inherit
     with:
       skip_build: true
