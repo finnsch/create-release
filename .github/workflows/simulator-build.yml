@@ -1,0 +1,35 @@
+name: Create simulator build
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Build environment"
+        required: true
+        type: string
+    outputs:
+      run_id:
+        description: "Workflow Run ID of the Simulator build"
+        value: ${{ jobs.simulator_build.outputs.run_id }}
+
+jobs:
+  simulator_build:
+    name: Create simulator build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run_id: ${{ steps.run-id.outputs.run_id }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        lfs: true
+    - run: echo "hello simulator" > simulator.txt
+    - name: Upload archived simulator app
+      uses: actions/upload-artifact@v4
+      with:
+        name: my-simulator-build
+        path: simulator.txt
+    - name: Output run id
+      id: run-id
+      run: echo "run_id=${{ github.run_id }}" >> $GITHUB_OUTPUT

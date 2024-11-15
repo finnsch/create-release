@@ -1,0 +1,44 @@
+name: Run automation tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: "Choose which environment to build"
+        options:
+          - mock
+          - integration
+          - release
+        default: integration
+  workflow_call:
+    inputs:
+      simulator_build_run_id:
+        description: "Workflow Run ID of the Simulator build"
+        required: true
+        type: string
+
+jobs:
+  simulator_build:
+    name: Create simulator build
+    if: ${{ github.event == 'workflow_dispatch' }}
+    uses: ./.github/workflows/simulator-build.yml
+    with:
+      environment: ${{ github.event.inputs.environment }}
+  tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [simulator_build]
+    if: |
+      always() &&
+      !contains(needs.*.result, 'cancelled')
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Download Simulator app build
+      uses: actions/download-artifact@v4
+      with:
+        name: EHealth.app
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        run-id: ${{ github.event == 'workflow_call' && inputs.simulator_build_run_id || needs.simulator_build.outputs.run_id }}

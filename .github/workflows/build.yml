@@ -113,3 +113,14 @@ jobs:
         body: "${{ needs.release_notes.outputs.release_notes }}"
         tag: "${{ steps.tag_name.outputs.tag_name }}"
         prerelease: ${{ github.event.inputs.environment != 'release' }}
+
+  simulator_build:
+    uses: ./.github/workflows/simulator-build.yml
+    with:
+      environment: ${{ github.event.inputs.environment }}
+
+  test_automation:
+    needs: [simulator_build]
+    uses: ./.github/workflows/test-automation.yml
+    with:
+      simulator_build_run_id: ${{ needs.simulator_build.outputs.run_id }}
