@@ -118,9 +118,12 @@ jobs:
     name: Create simulator build
     uses: ./.github/workflows/simulator-build.yml
     with:
+      deployment_environment: automation-tests
       environment: ${{ github.event.inputs.environment }}
 
   test_automation:
     name: Run tests
     needs: [simulator_build]
     uses: ./.github/workflows/test-automation.yml
+    with:
+      skip_build: true
