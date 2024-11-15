@@ -2,24 +2,21 @@ name: Run automation tests
 
 on:
   workflow_dispatch:
-    inputs:
-      environment:
-        type: choice
-        description: "Choose which environment to build"
-        options:
-          - mock
-          - integration
-          - release
-        default: integration
   workflow_call:
+    inputs:
+      skip_build:
+        description: "Skips simulator build job"
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   simulator_build:
     name: Create simulator build
-    if: ${{ github.event == 'workflow_dispatch' }}
+    if: ${{ !inputs.skip_build }}
     uses: ./.github/workflows/simulator-build.yml
     with:
-      environment: ${{ github.event.inputs.environment }}
+      environment: integration
   tests:
     name: Run tests
     runs-on: ubuntu-latest
