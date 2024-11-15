@@ -7,10 +7,6 @@ on:
         description: "Build environment"
         required: true
         type: string
-    outputs:
-      run_id:
-        description: "Workflow Run ID of the Simulator build"
-        value: ${{ jobs.simulator_build.outputs.run_id }}
 
 jobs:
   simulator_build:
@@ -30,6 +26,3 @@ jobs:
       with:
         name: my-simulator-build
         path: simulator.txt
-    - name: Output run id
-      id: run-id
-      run: echo "run_id=${{ github.run_id }}" >> $GITHUB_OUTPUT

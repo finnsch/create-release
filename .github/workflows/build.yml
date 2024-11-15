@@ -124,5 +124,3 @@ jobs:
     name: Run tests
     needs: [simulator_build]
     uses: ./.github/workflows/test-automation.yml
-    with:
-      simulator_build_run_id: ${{ needs.simulator_build.outputs.run_id }}

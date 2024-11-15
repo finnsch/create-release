@@ -12,11 +12,6 @@ on:
           - release
         default: integration
   workflow_call:
-    inputs:
-      simulator_build_run_id:
-        description: "Workflow Run ID of the Simulator build"
-        required: true
-        type: string
 
 jobs:
   simulator_build:
@@ -40,7 +35,5 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: my-simulator-build
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        run-id: ${{ github.event == 'workflow_call' && inputs.simulator_build_run_id || needs.simulator_build.outputs.run_id }}
     - name: Open Simulator app
       run: cat simulator.txt
