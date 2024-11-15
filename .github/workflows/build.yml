@@ -15,9 +15,6 @@ on:
       release_name:
         type: string
         description: 'Release name (e.g. RC). It will be added to the release notes.'
-      run_tests:
-        type: boolean
-        description: 'Run automation tests for this build'
 
 jobs:
   generate_changelog:
@@ -117,9 +114,16 @@ jobs:
         tag: "${{ steps.tag_name.outputs.tag_name }}"
         prerelease: ${{ github.event.inputs.environment != 'release' }}
 
+  tests:
+    name: Run tests 
+    environment: automation-tests
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo "Create simulator build and run automated tests"
+
   simulator_build:
     name: Create simulator build
-    if: ${{ github.event.inputs.run_tests == 'true' }}
+    needs: [tests]
     uses: ./.github/workflows/simulator-build.yml
     with:
       environment: ${{ github.event.inputs.environment }}
