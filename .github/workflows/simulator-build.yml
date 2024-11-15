@@ -3,6 +3,11 @@ name: Create simulator build
 on:
   workflow_call:
     inputs:
+      deployment_environment:
+        description: "Deployment environment"
+        required: false
+        type: string
+        default: ''
       environment:
         description: "Build environment"
         required: true
@@ -12,6 +17,7 @@ jobs:
   simulator_build:
     name: Create simulator build
     runs-on: ubuntu-latest
+    environment: ${{ inputs.deployment_environment }}
     timeout-minutes: 5
     outputs:
       run_id: ${{ steps.run-id.outputs.run_id }}
