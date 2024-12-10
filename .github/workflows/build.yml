@@ -112,6 +112,7 @@ jobs:
         artifacts: world.txt
         body: "${{ needs.release_notes.outputs.release_notes }}"
         tag: "${{ steps.tag_name.outputs.tag_name }}"
+        commit: ${{ github.sha }}
         prerelease: ${{ github.event.inputs.environment != 'release' }}
 
   tests:
