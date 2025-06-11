@@ -1,0 +1,11 @@
+require 'yaml'
+
+default_platform(:ios)
+
+platform :ios do
+  lane :upload_testflight do |options|
+		changelog = options[:changelog]
+		
+		puts "Uploading to TestFlight with changelog: #{changelog}"
+	end
+end

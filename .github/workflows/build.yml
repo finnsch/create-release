@@ -86,11 +86,33 @@ jobs:
           echo "${delimiter}"
         } >> "$GITHUB_OUTPUT"
 
+  distribute_ios:
+    name: Distribute iOS build to TestFlight
+    runs-on: macos-15
+    timeout-minutes: 5
+    needs: [release_notes]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.1'
+          bundler-cache: true
+      - name: Upload IPA to TestFlight
+        uses: maierj/fastlane-action@v3.1.0
+        with:
+          lane: upload_testflight
+          options: >
+            {
+              "changelog": ${{ toJSON(needs.release_notes.outputs.release_notes) }}
+            }
+
   create_release:
     name: Create release
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [create_build, generate_changelog, release_notes]
+    needs: [distribute_ios, generate_changelog, release_notes]
     permissions:
       contents: write
     steps:

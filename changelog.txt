@@ -2,4 +2,4 @@
 - [ABC-1234] Add new feature
 
 ### Fix
-- [ABC-4321] Fix crash
+- [ABC-4321] Fix crash when tapping "Cancel" button
