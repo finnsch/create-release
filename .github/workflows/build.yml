@@ -101,12 +101,10 @@ jobs:
           bundler-cache: true
       - name: Upload IPA to TestFlight
         uses: maierj/fastlane-action@v3.1.0
+        env:
+          CHANGELOG: ${{ needs.release_notes.outputs.release_notes }}
         with:
           lane: upload_testflight
-          options: >
-            {
-              "changelog": ${{ toJSON(needs.release_notes.outputs.release_notes) }}
-            }
 
   create_release:
     name: Create release

@@ -4,7 +4,7 @@ default_platform(:ios)
 
 platform :ios do
   lane :upload_testflight do |options|
-		changelog = options[:changelog]
+		changelog = ENV['CHANGELOG'] || ''
 		
 		puts "Uploading to TestFlight with changelog: #{changelog}"
 	end
